@@ -36,7 +36,7 @@ def ochistit_sostoyanie(chat_id):
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.send_message(message.chat.id,
-        "",
+        "привет я готов к работе",
         reply_markup=glavnaya_klaviatura())
 
 @bot.message_handler(commands=['add'])
@@ -47,8 +47,7 @@ def dobavit_komanda(message):
 @bot.message_handler(commands=['stats'])
 def statistika_komanda(message):
     kb = InlineKeyboardMarkup()
-    kb.add(InlineKeyboardButton("📅 За неделю", callback_data="stats_nedelya"))
-    kb.add(InlineKeyboardButton("🗓 За месяц", callback_data="stats_mesyac"))
+    kb.add(InlineKeyboardButton("📅 За неделю", callback_data="stats_nedelya"))    kb.add(InlineKeyboardButton("🗓 За месяц", callback_data="stats_mesyac"))
     kb.add(InlineKeyboardButton("🔍 Инсайты", callback_data="stats_insayty"))
     kb.add(InlineKeyboardButton("📉 График", callback_data="stats_grafik"))
     bot.send_message(message.chat.id, "Что хочешь узнать?", reply_markup=kb)
@@ -90,14 +89,12 @@ def obrabotchik_callback(call):
         zapisi = poluchit_zapisi(cid, 30)
         bot.send_message(cid, generirovat_insayty(zapisi))
     elif call.data == "stats_grafik":
-        zapisi = poluchit_zapisi(cid, 30)
-        buf = postroit_grafik_nastroeniya(zapisi)
+        buf = postroit_grafik_nastroeniya(cid)
         if buf:
             bot.send_photo(cid, buf, caption="📈 График изменения настроения")
         else:
             bot.send_message(cid, "Недостаточно данных для графика")
     bot.answer_callback_query(call.id)
-
 @bot.message_handler(func=lambda m: True)
 def obrabotchik_teksta(message):
     cid = message.chat.id
@@ -147,8 +144,7 @@ def obrabotchik_teksta(message):
         dobavit_zapis(cid, dannye['nastroenie'], dannye['chasy_ucheby'], dannye['chasy_sna'], komment)
         ochistit_sostoyanie(cid)
         bot.send_message(cid, "✅ Данные сохранены! Спасибо 😊", reply_markup=glavnaya_klaviatura())
-    else:
-        if tekst == "➕ Записать день":
+    else:        if tekst == "➕ Записать день":
             dobavit_komanda(message)
         elif tekst == "📊 Статистика":
             statistika_komanda(message)
