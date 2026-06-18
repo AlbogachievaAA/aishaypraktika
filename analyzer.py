@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import io
+from db import get_connection
 
 def nedelnyy_otchet(zapisi):
     if not zapisi:
@@ -37,21 +38,39 @@ def generirovat_insayty(zapisi):
         tekst += f"• Учёба <3 ч → настроение {sr_malo:.1f}, ≥3 ч → {sr_mnogo:.1f}\n"
     return tekst
 
-def postroit_grafik_nastroeniya(zapisi):
+def postroit_grafik_nastroeniya(user_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute('''
+        SELECT date, mood
+        FROM daily_log
+        WHERE user_id = %s
+        ORDER BY date ASC
+    ''', (user_id,))
+    
+    zapisi = cur.fetchall()
+    cur.close()
+    conn.close()
+    
     if not zapisi:
         return None
-    daty = [z['data'].strftime("%Y-%m-%d") for z in zapisi]
-    nastroeniya = [z['nastroenie'] for z in zapisi]
+    daty = [z[0].strftime("%Y-%m-%d") for z in zapisi]
+    nastroeniya = [z[1] for z in zapisi]
     plt.figure(figsize=(10, 5))
-    plt.plot(daty, nastroeniya, marker='o')
-    plt.title("Динамика настроения")
-    plt.xlabel("Дата")
-    plt.ylabel("Настроение (1-5)")
+    plt.plot(daty, nastroeniya, marker='o', linewidth=2, markersize=8, color='purple')
+    plt.title(f"Динамика настроения (пользователь {user_id})", fontsize=14)
+    plt.xlabel("Дата", fontsize=12)
+    plt.ylabel("Настроение (1-5)", fontsize=12)
     plt.ylim(0.5, 5.5)
+    plt.yticks([1, 2, 3, 4, 5])
     plt.grid(True, alpha=0.3)
     plt.xticks(rotation=45)
+    plt.tight_layout()
+    
     buf = io.BytesIO()
-    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.savefig(buf, format='png', bbox_inches='tight', dpi=150)
     buf.seek(0)
     plt.close()
+    
     return buf
+    
