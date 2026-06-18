@@ -1,10 +1,11 @@
 import psycopg2
 from datetime import date
 
+
 KONFIG_BD = {
-    "dbname": "praktikaaisha",
+    "dbname": "postgres",
     "user": "postgres",
-    "password": "qwe123qwe",      # ZAMENI NA SVOY PAROL
+    "password": "***",
     "host": "localhost",
     "port": 5432
 }
@@ -62,3 +63,4 @@ def ochistit_dannye_polzovatelya(id_polzovatelya):
         with conn.cursor() as cur:
             cur.execute("DELETE FROM daily_log WHERE user_id = %s", (id_polzovatelya,))
         conn.commit()
+get_connection = poluchit_soedinenie
